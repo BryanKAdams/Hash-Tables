@@ -16,6 +16,10 @@ class HashTable:
 
     Implement this.
     """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.storage = [None] * capacity
+        self.counter = 0
 
     def fnv1(self, key):
         """
@@ -30,6 +34,10 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for x in key:
+            hash = hash * 33 + ord(x)
+        return hash 
 
     def hash_index(self, key):
         """
@@ -47,7 +55,19 @@ class HashTable:
 
         Implement this.
         """
-
+        index = self.hash_index(key)
+        if self.storage[index] is None:
+            self.storage[index] = HashTableEntry(key, value)
+        else:
+            pointer_node = self.storage[index]
+            if pointer_node.key == key:
+                pointer_node.value = value
+                return pointer_node.value
+            while pointer_node.next is not None:
+                if pointer_node.next.key == key:
+                    pointer_node.next.value = value
+                    return pointer_node.next.value
+            pointer_node.next = HashTableEntry(key, value)
     def delete(self, key):
         """
         Remove the value stored with the given key.
@@ -56,7 +76,8 @@ class HashTable:
 
         Implement this.
         """
-
+        index = self.hash_index(key)
+        self.storage[index] = None
     def get(self, key):
         """
         Retrieve the value stored with the given key.
@@ -65,6 +86,22 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        if self.storage[index] == None:
+            return None
+        else:
+            if self.storage[index].key == key:
+                return self.storage[index].value
+            else:
+                pointer_boi = self.storage[index].next
+                while pointer_boi is not None:
+                    pointer_two = pointer_boi
+                    pointer_boi = pointer_boi.next
+                    if pointer_two.key == key:
+                         return pointer_two.value
+                    else:
+                        continue
+                return self.storage[index].value
 
     def resize(self):
         """
@@ -73,6 +110,15 @@ class HashTable:
 
         Implement this.
         """
+        
+        storage = self.storage
+        self.capacity *=2
+        self.storage = [None] * self.capacity
+        for item in storage:
+            curr_node = item
+            while curr_node is not None:
+                self.put(curr_node.key, curr_node.value)
+                curr_node = curr_node.next
 
 if __name__ == "__main__":
     ht = HashTable(2)
