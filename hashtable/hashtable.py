@@ -19,6 +19,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
+        self.counter = 0
 
     def fnv1(self, key):
         """
@@ -55,8 +56,18 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
-        self.storage[index] = HashTableEntry(key, value)
-
+        if self.storage[index] is None:
+            self.storage[index] = HashTableEntry(key, value)
+        else:
+            pointer_node = self.storage[index]
+            if pointer_node.key == key:
+                pointer_node.value = value
+                return pointer_node.value
+            while pointer_node.next is not None:
+                if pointer_node.next.key == key:
+                    pointer_node.next.value = value
+                    return pointer_node.next.value
+            pointer_node.next = HashTableEntry(key, value)
     def delete(self, key):
         """
         Remove the value stored with the given key.
@@ -79,7 +90,18 @@ class HashTable:
         if self.storage[index] == None:
             return None
         else:
-            return self.storage[index].value
+            if self.storage[index].key == key:
+                return self.storage[index].value
+            else:
+                pointer_boi = self.storage[index].next
+                while pointer_boi is not None:
+                    pointer_two = pointer_boi
+                    pointer_boi = pointer_boi.next
+                    if pointer_two.key == key:
+                         return pointer_two.value
+                    else:
+                        continue
+                return self.storage[index].value
 
     def resize(self):
         """
@@ -88,14 +110,15 @@ class HashTable:
 
         Implement this.
         """
+        
         storage = self.storage
         self.capacity *=2
-        self.storage =[None] * self.capacity
+        self.storage = [None] * self.capacity
         for item in storage:
-            if item == None:
-                continue
-        else:
-            self.put(item.key, item.value)
+            curr_node = item
+            while curr_node is not None:
+                self.put(curr_node.key, curr_node.value)
+                curr_node = curr_node.next
 
 if __name__ == "__main__":
     ht = HashTable(2)
