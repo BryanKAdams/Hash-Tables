@@ -58,6 +58,11 @@ class HashTable:
         index = self.hash_index(key)
         if self.storage[index] is None:
             self.storage[index] = HashTableEntry(key, value)
+            self.counter +=1
+            if self.counter / self.capacity  > .7:
+                self.resize()
+            if self.counter / self.capacity < .2:
+                self.half()
         else:
             pointer_node = self.storage[index]
             if pointer_node.key == key:
@@ -68,6 +73,10 @@ class HashTable:
                     pointer_node.next.value = value
                     return pointer_node.next.value
             pointer_node.next = HashTableEntry(key, value)
+            if self.counter / self.capacity > .7:
+                self.resize()
+            if self.counter / self.capacity < .2:
+                self.half()
     def delete(self, key):
         """
         Remove the value stored with the given key.
@@ -110,7 +119,8 @@ class HashTable:
 
         Implement this.
         """
-        
+        print(self.capacity)
+        self.counter = 0
         storage = self.storage
         self.capacity *=2
         self.storage = [None] * self.capacity
@@ -119,9 +129,31 @@ class HashTable:
             while curr_node is not None:
                 self.put(curr_node.key, curr_node.value)
                 curr_node = curr_node.next
+    def half(self):
+        # print(self.capacity / self.storage)
+        divider = 2
+        if self.capacity <= 128:
+            return
+        else:
+            print(self.capacity)
+            if self.capacity > 128 and self.capacity < 256:
+                print(self.capacity)
+                divider = self.capacity / 128
+            self.counter = 0
+            storage = self.storage
+            print(divider)
+            self.capacity = self.capacity // divider
+            self.capacity = int(self.capacity)
+            self.storage = [None] * self.capacity
+            print(self.capacity)
+            for item in storage:
+                curr_node = item
+                while curr_node is not None:
+                    self.put(curr_node.key, curr_node.value)
+                    curr_node= curr_node.next
 
 if __name__ == "__main__":
-    ht = HashTable(2)
+    ht = HashTable(200)
 
     ht.put("line_1", "Tiny hash table")
     ht.put("line_2", "Filled beyond capacity")
@@ -133,6 +165,7 @@ if __name__ == "__main__":
     print(ht.get("line_1"))
     print(ht.get("line_2"))
     print(ht.get("line_3"))
+    print(ht.get("key-0"))
 
     # Test resizing
     old_capacity = len(ht.storage)
@@ -140,6 +173,8 @@ if __name__ == "__main__":
     new_capacity = len(ht.storage)
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+
+
 
     # Test if data intact after resizing
     print(ht.get("line_1"))
